@@ -23,3 +23,7 @@ linklint/
 .java-version
 tmp
 **/.flattened-pom.xml
+.*.sw*
+ID
+filenametags
+tags
