@@ -116,6 +116,7 @@ import org.apache.hadoop.hbase.http.HttpServer;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcUtils;
 import org.apache.hadoop.hbase.ipc.RpcServer;
 import org.apache.hadoop.hbase.ipc.ServerNotRunningYetException;
+import org.apache.hadoop.hbase.keymeta.KeyMetaMasterService;
 import org.apache.hadoop.hbase.log.HBaseMarkers;
 import org.apache.hadoop.hbase.master.MasterRpcServices.BalanceSwitchMode;
 import org.apache.hadoop.hbase.master.assignment.AssignmentManager;
@@ -322,6 +323,7 @@ public class HMaster extends HRegionServer implements MasterServices {
   private MasterFileSystem fileSystemManager;
   private MasterWalManager walManager;
   private ClusterKeyManager clusterKeyManager;
+  private KeyMetaMasterService keyMetaMasterService;
 
   // manager to manage procedure-based WAL splitting, can be null if current
   // is zk-based WAL splitting. SplitWALManager will replace SplitLogManager
@@ -965,6 +967,9 @@ public class HMaster extends HRegionServer implements MasterServices {
     createProcedureExecutor();
     Map<Class<?>, List<Procedure<MasterProcedureEnv>>> procsByType = procedureExecutor
       .getActiveProceduresNoCopy().stream().collect(Collectors.groupingBy(p -> p.getClass()));
+
+    keyMetaMasterService = new KeyMetaMasterService(this);
+    keyMetaMasterService.init();
 
     // Create Assignment Manager
     this.assignmentManager = createAssignmentManager(this, masterRegion);

@@ -54,6 +54,10 @@ module Hbase
       ::Hbase::RSGroupAdmin.new(@connection)
     end
 
+    def pbe_admin
+      ::Hbase::PBEAdmin.new(@connection)
+    end
+
     def taskmonitor
       ::Hbase::TaskMonitor.new(configuration)
     end
