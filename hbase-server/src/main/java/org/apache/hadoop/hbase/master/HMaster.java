@@ -116,7 +116,7 @@ import org.apache.hadoop.hbase.http.HttpServer;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcUtils;
 import org.apache.hadoop.hbase.ipc.RpcServer;
 import org.apache.hadoop.hbase.ipc.ServerNotRunningYetException;
-import org.apache.hadoop.hbase.keymeta.KeyMetaMasterService;
+import org.apache.hadoop.hbase.keymeta.PBEKeymetaMasterService;
 import org.apache.hadoop.hbase.log.HBaseMarkers;
 import org.apache.hadoop.hbase.master.MasterRpcServices.BalanceSwitchMode;
 import org.apache.hadoop.hbase.master.assignment.AssignmentManager;
@@ -322,8 +322,8 @@ public class HMaster extends HRegionServer implements MasterServices {
   // file system manager for the master FS operations
   private MasterFileSystem fileSystemManager;
   private MasterWalManager walManager;
-  private ClusterKeyManager clusterKeyManager;
-  private KeyMetaMasterService keyMetaMasterService;
+  private PBEClusterKeyManager pbeClusterKeyManager;
+  private PBEKeymetaMasterService pbeKeymetaMasterService;
 
   // manager to manage procedure-based WAL splitting, can be null if current
   // is zk-based WAL splitting. SplitWALManager will replace SplitLogManager
@@ -930,8 +930,8 @@ public class HMaster extends HRegionServer implements MasterServices {
     ZKClusterId.setClusterId(this.zooKeeper, fileSystemManager.getClusterId());
     this.clusterId = clusterId.toString();
 
-    clusterKeyManager = new ClusterKeyManager(this);
-    clusterKeyManager.ensureClusterKeyInitialized();
+    pbeClusterKeyManager = new PBEClusterKeyManager(this);
+    pbeClusterKeyManager.ensureClusterKeyInitialized();
 
     // Precaution. Put in place the old hbck1 lock file to fence out old hbase1s running their
     // hbck1s against an hbase2 cluster; it could do damage. To skip this behavior, set
@@ -968,8 +968,8 @@ public class HMaster extends HRegionServer implements MasterServices {
     Map<Class<?>, List<Procedure<MasterProcedureEnv>>> procsByType = procedureExecutor
       .getActiveProceduresNoCopy().stream().collect(Collectors.groupingBy(p -> p.getClass()));
 
-    keyMetaMasterService = new KeyMetaMasterService(this);
-    keyMetaMasterService.init();
+    pbeKeymetaMasterService = new PBEKeymetaMasterService(this);
+    pbeKeymetaMasterService.init();
 
     // Create Assignment Manager
     this.assignmentManager = createAssignmentManager(this, masterRegion);

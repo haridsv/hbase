@@ -28,6 +28,8 @@ import org.apache.hadoop.hbase.ServerName;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
+import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.log.HBaseMarkers;
 import org.apache.hadoop.hbase.zookeeper.ZKWatcher;
 import org.slf4j.Logger;
@@ -38,12 +40,13 @@ import org.slf4j.LoggerFactory;
  */
 public class MockServer implements Server {
   private static final Logger LOG = LoggerFactory.getLogger(MockServer.class);
-  final static ServerName NAME = ServerName.valueOf("MockServer", 123, -1);
 
-  boolean stopped;
-  boolean aborted;
-  final ZKWatcher zk;
-  final HBaseTestingUtility htu;
+  public boolean stopped;
+  public boolean aborted;
+  public final ZKWatcher zk;
+  public final HBaseTestingUtility htu;
+  public final ServerName name;
+  public final boolean trackStatus;
 
   public MockServer() throws ZooKeeperConnectionException, IOException {
     // Shutdown default constructor by making it private.
@@ -61,12 +64,21 @@ public class MockServer implements Server {
    */
   public MockServer(final HBaseTestingUtility htu, final boolean zkw)
     throws ZooKeeperConnectionException, IOException {
+    this("MockServer,60020,000000", htu, zkw, true, true);
+  }
+
+  public MockServer(final String name, final HBaseTestingUtility htu, final boolean createZkWatcher,
+      final boolean canCreateBaseZNode, final boolean trackStatus) throws IOException {
+    this.name = ServerName.valueOf(name);
     this.htu = htu;
-    this.zk = zkw ? new ZKWatcher(htu.getConfiguration(), NAME.toString(), this, true) : null;
+    this.zk = createZkWatcher ? new ZKWatcher(htu.getConfiguration(), this.name.toShortString(), this,
+      canCreateBaseZNode) : null;
+    this.trackStatus = trackStatus;
   }
 
   @Override
   public void abort(String why, Throwable e) {
+    if (! trackStatus) return;
     LOG.error(HBaseMarkers.FATAL, "Abort why=" + why, e);
     stop(why);
     this.aborted = true;
@@ -74,6 +86,7 @@ public class MockServer implements Server {
 
   @Override
   public void stop(String why) {
+    if (! trackStatus) return;
     LOG.debug("Stop why=" + why);
     this.stopped = true;
   }
@@ -105,7 +118,7 @@ public class MockServer implements Server {
 
   @Override
   public ServerName getServerName() {
-    return NAME;
+    return name;
   }
 
   @Override
@@ -116,6 +129,14 @@ public class MockServer implements Server {
 
   @Override
   public ChoreService getChoreService() {
+    return null;
+  }
+
+  @Override public PBEKeyAccessor getPBEKeyAccessor() {
+    return null;
+  }
+
+  @Override public PBEKeymetaAdmin getPBEKeymetaAdmin() {
     return null;
   }
 

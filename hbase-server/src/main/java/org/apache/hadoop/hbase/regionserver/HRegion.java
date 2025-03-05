@@ -768,8 +768,8 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
     this.conf = new CompoundConfiguration().add(confParam).addBytesMap(htd.getValues());
     this.cellComparator = htd.isMetaTable()
       || conf.getBoolean(USE_META_CELL_COMPARATOR, DEFAULT_USE_META_CELL_COMPARATOR)
-        ? MetaCellComparator.META_COMPARATOR
-        : CellComparatorImpl.COMPARATOR;
+      ? MetaCellComparator.META_COMPARATOR
+      : CellComparatorImpl.COMPARATOR;
     this.lock = new ReentrantReadWriteLock(
       conf.getBoolean(FAIR_REENTRANT_CLOSE_LOCK, DEFAULT_FAIR_REENTRANT_CLOSE_LOCK));
     this.regionLockHolders = new ConcurrentHashMap<>();
@@ -873,9 +873,9 @@ public class HRegion implements HeapSize, PropagatingConfigurationObserver, Regi
     // disable stats tracking system tables, but check the config for everything else
     this.regionStatsEnabled = htd.getTableName().getNamespaceAsString()
       .equals(NamespaceDescriptor.SYSTEM_NAMESPACE_NAME_STR)
-        ? false
-        : conf.getBoolean(HConstants.ENABLE_CLIENT_BACKPRESSURE,
-          HConstants.DEFAULT_ENABLE_CLIENT_BACKPRESSURE);
+      ? false
+      : conf.getBoolean(HConstants.ENABLE_CLIENT_BACKPRESSURE,
+      HConstants.DEFAULT_ENABLE_CLIENT_BACKPRESSURE);
 
     this.maxCellSize = conf.getLong(HBASE_MAX_CELL_SIZE_KEY, DEFAULT_MAX_CELL_SIZE);
     this.miniBatchSize =

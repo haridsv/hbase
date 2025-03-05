@@ -48,9 +48,12 @@ import org.apache.hadoop.hbase.coordination.ZkCoordinatedStateManager;
 import org.apache.hadoop.hbase.executor.ExecutorService;
 import org.apache.hadoop.hbase.executor.ExecutorService.ExecutorConfig;
 import org.apache.hadoop.hbase.executor.ExecutorType;
+import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
+import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.testclassification.MediumTests;
 import org.apache.hadoop.hbase.testclassification.RegionServerTests;
 import org.apache.hadoop.hbase.util.CancelableProgressable;
+import org.apache.hadoop.hbase.util.MockServer;
 import org.apache.hadoop.hbase.zookeeper.ZKSplitLog;
 import org.apache.hadoop.hbase.zookeeper.ZKUtil;
 import org.apache.hadoop.hbase.zookeeper.ZKWatcher;
@@ -81,84 +84,17 @@ public class TestSplitLogWorker {
   private SplitLogWorker slw;
   private ExecutorService executorService;
 
-  static class DummyServer implements Server {
-    private ZKWatcher zkw;
-    private Configuration conf;
+  static class DummyServer extends MockServer {
     private CoordinatedStateManager cm;
 
-    public DummyServer(ZKWatcher zkw, Configuration conf) {
-      this.zkw = zkw;
-      this.conf = conf;
+    public DummyServer() throws IOException {
+      super("split-log-worker-tests,123,-1", TEST_UTIL, true, false, false);
       cm = new ZkCoordinatedStateManager(this);
-    }
-
-    @Override
-    public void abort(String why, Throwable e) {
-    }
-
-    @Override
-    public boolean isAborted() {
-      return false;
-    }
-
-    @Override
-    public void stop(String why) {
-    }
-
-    @Override
-    public boolean isStopped() {
-      return false;
-    }
-
-    @Override
-    public Configuration getConfiguration() {
-      return conf;
-    }
-
-    @Override
-    public ZKWatcher getZooKeeper() {
-      return zkw;
-    }
-
-    @Override
-    public ServerName getServerName() {
-      return null;
     }
 
     @Override
     public CoordinatedStateManager getCoordinatedStateManager() {
       return cm;
-    }
-
-    @Override
-    public ClusterConnection getConnection() {
-      return null;
-    }
-
-    @Override
-    public ChoreService getChoreService() {
-      return null;
-    }
-
-    @Override
-    public ClusterConnection getClusterConnection() {
-      // TODO Auto-generated method stub
-      return null;
-    }
-
-    @Override
-    public FileSystem getFileSystem() {
-      return null;
-    }
-
-    @Override
-    public boolean isStopping() {
-      return false;
-    }
-
-    @Override
-    public Connection createConnection(Configuration conf) throws IOException {
-      return null;
     }
   }
 
@@ -195,9 +131,8 @@ public class TestSplitLogWorker {
   @Before
   public void setup() throws Exception {
     TEST_UTIL.startMiniZKCluster();
-    Configuration conf = TEST_UTIL.getConfiguration();
-    zkw = new ZKWatcher(TEST_UTIL.getConfiguration(), "split-log-worker-tests", null);
-    ds = new DummyServer(zkw, conf);
+    ds = new DummyServer();
+    zkw = ds.zk;
     ZKUtil.deleteChildrenRecursively(zkw, zkw.getZNodePaths().baseZNode);
     ZKUtil.createAndFailSilent(zkw, zkw.getZNodePaths().baseZNode);
     assertThat(ZKUtil.checkExists(zkw, zkw.getZNodePaths().baseZNode), not(is(-1)));

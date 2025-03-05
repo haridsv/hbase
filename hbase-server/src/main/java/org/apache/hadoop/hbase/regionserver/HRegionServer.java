@@ -128,6 +128,9 @@ import org.apache.hadoop.hbase.ipc.RpcServer;
 import org.apache.hadoop.hbase.ipc.RpcServerInterface;
 import org.apache.hadoop.hbase.ipc.ServerNotRunningYetException;
 import org.apache.hadoop.hbase.ipc.ServerRpcController;
+import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
+import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
+import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdminImpl;
 import org.apache.hadoop.hbase.log.HBaseMarkers;
 import org.apache.hadoop.hbase.master.HMaster;
 import org.apache.hadoop.hbase.master.LoadBalancer;
@@ -474,6 +477,9 @@ public class HRegionServer extends Thread
 
   private Map<String, com.google.protobuf.Service> coprocessorServiceHandlers = Maps.newHashMap();
 
+  private PBEKeymetaAdminImpl pbeKeymetaAdmin;
+  private PBEKeyAccessor pbeKeyAccessor;
+
   /**
    * The server name the Master sees us as. Its made from the hostname the master passes us, port,
    * and server startcode. Gets set after registration against Master.
@@ -674,6 +680,8 @@ public class HRegionServer extends Thread
         (t, e) -> abort("Uncaught exception in executorService thread " + t.getName(), e);
 
       initializeFileSystem();
+      pbeKeymetaAdmin = new PBEKeymetaAdminImpl(this);
+      pbeKeyAccessor = new PBEKeyAccessor(pbeKeymetaAdmin);
 
       this.configurationManager = new ConfigurationManager();
       setupWindows(getConfiguration(), getConfigurationManager());
@@ -828,6 +836,16 @@ public class HRegionServer extends Thread
 
   protected String getProcessName() {
     return REGIONSERVER;
+  }
+
+  @Override
+  public PBEKeymetaAdmin getPBEKeymetaAdmin() {
+    return pbeKeymetaAdmin;
+  }
+
+  @Override
+  public PBEKeyAccessor getPBEKeyAccessor() {
+    return pbeKeyAccessor;
   }
 
   protected boolean canCreateBaseZNode() {
