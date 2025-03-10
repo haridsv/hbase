@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyCache;
 import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.zookeeper.ZKWatcher;
@@ -71,7 +72,19 @@ public interface Server extends Abortable, Stoppable {
   /** Returns The {@link ChoreService} instance for this server */
   ChoreService getChoreService();
 
+  /**
+   * @return the cache for cluster keys.
+   */
+  public PBEClusterKeyCache getPBEClusterKeyCache();
+
+  /**
+   * @return the accessor for cluster keys.
+   */
   public PBEKeyAccessor getPBEKeyAccessor();
+
+  /**
+   * @return the admin for keymeta.
+   */
   public PBEKeymetaAdmin getPBEKeymetaAdmin();
 
   /** Returns Return the FileSystem object used (can return null!). */

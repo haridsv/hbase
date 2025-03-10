@@ -39,6 +39,7 @@ import org.apache.hadoop.hbase.Server;
 import org.apache.hadoop.hbase.ServerName;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyCache;
 import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.monitoring.MonitoredTask;
@@ -382,6 +383,10 @@ public class TestActiveMasterManager {
 
     @Override
     public ChoreService getChoreService() {
+      return null;
+    }
+
+    @Override public PBEClusterKeyCache getPBEClusterKeyCache() {
       return null;
     }
 

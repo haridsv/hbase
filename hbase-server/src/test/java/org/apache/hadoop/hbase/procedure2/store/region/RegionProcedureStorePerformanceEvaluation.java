@@ -29,6 +29,7 @@ import org.apache.hadoop.hbase.ServerName;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.io.util.MemorySizeUtil;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyCache;
 import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.master.region.MasterRegion;
@@ -114,6 +115,10 @@ public class RegionProcedureStorePerformanceEvaluation
     @Override
     public ChoreService getChoreService() {
       throw new UnsupportedOperationException();
+    }
+
+    @Override public PBEClusterKeyCache getPBEClusterKeyCache() {
+      return null;
     }
 
     @Override public PBEKeyAccessor getPBEKeyAccessor() {

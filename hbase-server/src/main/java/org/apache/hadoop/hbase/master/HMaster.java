@@ -116,6 +116,8 @@ import org.apache.hadoop.hbase.http.HttpServer;
 import org.apache.hadoop.hbase.ipc.CoprocessorRpcUtils;
 import org.apache.hadoop.hbase.ipc.RpcServer;
 import org.apache.hadoop.hbase.ipc.ServerNotRunningYetException;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyAccessor;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyCache;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaMasterService;
 import org.apache.hadoop.hbase.log.HBaseMarkers;
 import org.apache.hadoop.hbase.master.MasterRpcServices.BalanceSwitchMode;
@@ -932,6 +934,7 @@ public class HMaster extends HRegionServer implements MasterServices {
 
     pbeClusterKeyManager = new PBEClusterKeyManager(this);
     pbeClusterKeyManager.ensureClusterKeyInitialized();
+    buildPBEClusterKeyCache();
 
     // Precaution. Put in place the old hbck1 lock file to fence out old hbase1s running their
     // hbck1s against an hbase2 cluster; it could do damage. To skip this behavior, set

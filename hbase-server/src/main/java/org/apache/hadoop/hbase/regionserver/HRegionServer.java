@@ -128,6 +128,8 @@ import org.apache.hadoop.hbase.ipc.RpcServer;
 import org.apache.hadoop.hbase.ipc.RpcServerInterface;
 import org.apache.hadoop.hbase.ipc.ServerNotRunningYetException;
 import org.apache.hadoop.hbase.ipc.ServerRpcController;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyAccessor;
+import org.apache.hadoop.hbase.keymeta.PBEClusterKeyCache;
 import org.apache.hadoop.hbase.keymeta.PBEKeyAccessor;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdmin;
 import org.apache.hadoop.hbase.keymeta.PBEKeymetaAdminImpl;
@@ -477,6 +479,7 @@ public class HRegionServer extends Thread
 
   private Map<String, com.google.protobuf.Service> coprocessorServiceHandlers = Maps.newHashMap();
 
+  private PBEClusterKeyCache pbeClusterKeyCache;
   private PBEKeymetaAdminImpl pbeKeymetaAdmin;
   private PBEKeyAccessor pbeKeyAccessor;
 
@@ -681,7 +684,6 @@ public class HRegionServer extends Thread
 
       initializeFileSystem();
       pbeKeymetaAdmin = new PBEKeymetaAdminImpl(this);
-      pbeKeyAccessor = new PBEKeyAccessor(pbeKeymetaAdmin);
 
       this.configurationManager = new ConfigurationManager();
       setupWindows(getConfiguration(), getConfigurationManager());
@@ -836,6 +838,17 @@ public class HRegionServer extends Thread
 
   protected String getProcessName() {
     return REGIONSERVER;
+  }
+
+  protected void buildPBEClusterKeyCache() throws IOException {
+    if (pbeClusterKeyCache == null) {
+      pbeClusterKeyCache = PBEClusterKeyCache.createCache(new PBEClusterKeyAccessor(this));
+    }
+  }
+
+  @Override
+  public PBEClusterKeyCache getPBEClusterKeyCache() {
+    return pbeClusterKeyCache;
   }
 
   @Override
@@ -1698,6 +1711,9 @@ public class HRegionServer extends Thread
         // initialize file system by the config fs.defaultFS and hbase.rootdir from master
         initializeFileSystem();
       }
+
+      buildPBEClusterKeyCache();
+      pbeKeyAccessor = new PBEKeyAccessor(pbeKeymetaAdmin);
 
       // hack! Maps DFSClient => RegionServer for logs. HDFS made this
       // config param for task trackers, but we can piggyback off of it.
