@@ -74,6 +74,8 @@ public class ServerSideScanMetrics {
   public static final String BLOCK_BYTES_SCANNED_KEY_METRIC_NAME = "BLOCK_BYTES_SCANNED";
 
   public static final String FS_READ_TIME_METRIC_NAME = "FS_READ_TIME";
+  public static final String BLOCK_HIT_COUNT_METRIC_NAME = "BLOCK_HIT_COUNT";
+  public static final String BLOCK_PROMOTION_COUNT_METRIC_NAME = "BLOCK_PROMOTION_COUNT";
   public static final String BYTES_READ_FROM_FS_METRIC_NAME = "BYTES_READ_FROM_FS";
   public static final String BYTES_READ_FROM_BLOCK_CACHE_METRIC_NAME =
     "BYTES_READ_FROM_BLOCK_CACHE";

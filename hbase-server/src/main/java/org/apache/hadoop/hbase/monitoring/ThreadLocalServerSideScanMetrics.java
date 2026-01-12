@@ -87,6 +87,12 @@ public final class ThreadLocalServerSideScanMetrics {
   private static final ThreadLocal<AtomicLong> FS_READ_TIME =
     ThreadLocal.withInitial(() -> new AtomicLong(0));
 
+  private static final ThreadLocal<AtomicLong> BLOCK_HIT_COUNT =
+    ThreadLocal.withInitial(() -> new AtomicLong(0));
+
+  private static final ThreadLocal<AtomicLong> BLOCK_PROMOTION_COUNT =
+    ThreadLocal.withInitial(() -> new AtomicLong(0));
+
   public static void setScanMetricsEnabled(boolean enable) {
     IS_SCAN_METRICS_ENABLED.set(enable);
   }
@@ -109,6 +115,20 @@ public final class ThreadLocalServerSideScanMetrics {
 
   public static long addFsReadTime(long time) {
     return FS_READ_TIME.get().addAndGet(time);
+  }
+
+  public static long addBlockHitCount(long count) {
+    if (!isScanMetricsEnabled()) {
+      return 0;
+    }
+    return BLOCK_HIT_COUNT.get().addAndGet(count);
+  }
+
+  public static long addBlockPromotionCount(long count) {
+    if (!isScanMetricsEnabled()) {
+      return 0;
+    }
+    return BLOCK_PROMOTION_COUNT.get().addAndGet(count);
   }
 
   public static boolean isScanMetricsEnabled() {
@@ -135,6 +155,14 @@ public final class ThreadLocalServerSideScanMetrics {
     return FS_READ_TIME.get();
   }
 
+  public static AtomicLong getBlockHitCountCounter() {
+    return BLOCK_HIT_COUNT.get();
+  }
+
+  public static AtomicLong getBlockPromotionCountCounter() {
+    return BLOCK_PROMOTION_COUNT.get();
+  }
+
   public static long getBytesReadFromFsAndReset() {
     return getBytesReadFromFsCounter().getAndSet(0);
   }
@@ -155,12 +183,22 @@ public final class ThreadLocalServerSideScanMetrics {
     return getFsReadTimeCounter().getAndSet(0);
   }
 
+  public static long getBlockHitCountAndReset() {
+    return getBlockHitCountCounter().getAndSet(0);
+  }
+
+  public static long getBlockPromotionCountAndReset() {
+    return getBlockPromotionCountCounter().getAndSet(0);
+  }
+
   public static void reset() {
     getBytesReadFromFsAndReset();
     getBytesReadFromBlockCacheAndReset();
     getBytesReadFromMemstoreAndReset();
     getBlockReadOpsCountAndReset();
     getFsReadTimeAndReset();
+    getBlockHitCountAndReset();
+    getBlockPromotionCountAndReset();
   }
 
   public static void populateServerSideScanMetrics(ServerSideScanMetrics metrics) {
@@ -177,5 +215,9 @@ public final class ThreadLocalServerSideScanMetrics {
       getBlockReadOpsCountCounter().get());
     metrics.addToCounter(ServerSideScanMetrics.FS_READ_TIME_METRIC_NAME,
       getFsReadTimeCounter().get());
+    metrics.addToCounter(ServerSideScanMetrics.BLOCK_HIT_COUNT_METRIC_NAME,
+      getBlockHitCountCounter().get());
+    metrics.addToCounter(ServerSideScanMetrics.BLOCK_PROMOTION_COUNT_METRIC_NAME,
+      getBlockPromotionCountCounter().get());
   }
 }

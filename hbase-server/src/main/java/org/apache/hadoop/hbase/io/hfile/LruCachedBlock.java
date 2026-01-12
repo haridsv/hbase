@@ -20,6 +20,7 @@ package org.apache.hadoop.hbase.io.hfile;
 import org.apache.hadoop.hbase.io.HeapSize;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.ClassSize;
+import org.apache.hadoop.hbase.monitoring.ThreadLocalServerSideScanMetrics;
 import org.apache.yetus.audience.InterfaceAudience;
 
 /**
@@ -77,6 +78,7 @@ public class LruCachedBlock implements HeapSize, Comparable<LruCachedBlock> {
     this.accessTime = accessTime;
     if (this.priority == BlockPriority.SINGLE) {
       this.priority = BlockPriority.MULTI;
+      ThreadLocalServerSideScanMetrics.addBlockPromotionCount(1);
     }
   }
 

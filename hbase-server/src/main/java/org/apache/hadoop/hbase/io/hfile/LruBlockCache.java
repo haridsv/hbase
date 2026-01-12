@@ -39,6 +39,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseInterfaceAudience;
 import org.apache.hadoop.hbase.io.HeapSize;
 import org.apache.hadoop.hbase.io.encoding.DataBlockEncoding;
+import org.apache.hadoop.hbase.monitoring.ThreadLocalServerSideScanMetrics;
 import org.apache.hadoop.hbase.util.ClassSize;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.yetus.audience.InterfaceAudience;
@@ -548,6 +549,7 @@ public class LruBlockCache implements FirstLevelBlockCache {
       stats.hit(caching, cacheKey.isPrimary(), cacheKey.getBlockType());
     }
     cb.access(count.incrementAndGet());
+    ThreadLocalServerSideScanMetrics.addBlockHitCount(1);
     return cb.getBuffer();
   }
 
